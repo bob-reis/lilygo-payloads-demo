@@ -1,0 +1,1 @@
+{"Settings":[{"name":"ForcePMKID","type":"bool","value":true,"range":{"min":false,"max":true}},{"name":"ForceProbe","type":"bool","value":true,"range":{"min":false,"max":true}},{"name":"SavePCAP","type":"bool","value":true,"range":{"min":false,"max":true}},{"name":"EnableLED","type":"bool","value":true,"range":{"min":false,"max":true}}]}

